@@ -6,7 +6,7 @@ Python GUI that enables users to download manga chapters locally to their PC.
 
 ## Instructions
 1. Clone this repository
-2. pip install all the import libraries in the `Download.py` file
+2. pip install all the import libraries in the `Downloader.py` file
 3. Run the python script
 4. Select the file path of where you want to download the chapters
 5. Pick the chapter range to download and click download

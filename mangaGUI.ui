@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1135</width>
-    <height>494</height>
+    <height>526</height>
    </rect>
   </property>
   <property name="font">
@@ -17,6 +17,9 @@
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(71, 71, 71);</string>
   </property>
   <widget class="QProgressBar" name="pageProgress">
    <property name="enabled">
@@ -34,7 +37,17 @@
     <bool>false</bool>
    </property>
    <property name="styleSheet">
-    <string notr="true"/>
+    <string notr="true">QProgressBar {
+	background-color: rgb(200, 200, 200);
+	color: rgb(170, 85, 127);
+	border-style: solid;
+	border-radius: 10px;
+	text-align: center;
+}
+
+QProgressBar::chunk {
+	border-radius: 10px;
+}</string>
    </property>
    <property name="value">
     <number>10</number>
@@ -62,7 +75,7 @@
     <string notr="true">background-color: rgb(234, 221, 255);</string>
    </property>
    <property name="text">
-    <string>Steel Ball Run Downloader</string>
+    <string>[Manga Title] Downloader</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
@@ -197,11 +210,21 @@
      <x>620</x>
      <y>360</y>
      <width>461</width>
-     <height>41</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true"/>
+    <string notr="true">QProgressBar {
+	background-color: rgb(200, 200, 200);
+	color: rgb(170, 85, 127);
+	border-style: solid;
+	border-radius: 10px;
+	text-align: center;
+}
+
+QProgressBar::chunk {
+	border-radius: 10px;
+}</string>
    </property>
    <property name="value">
     <number>0</number>
@@ -248,11 +271,24 @@
   <widget class="QPushButton" name="downloadButton">
    <property name="geometry">
     <rect>
-     <x>870</x>
-     <y>430</y>
-     <width>93</width>
-     <height>28</height>
+     <x>780</x>
+     <y>420</y>
+     <width>131</width>
+     <height>41</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+background-color: rgb(234, 221, 255);
+border: none;
+color: #333;
+border-radius: 20%;
+}</string>
    </property>
    <property name="text">
     <string>Download</string>
@@ -261,11 +297,24 @@
   <widget class="QPushButton" name="cancelButton">
    <property name="geometry">
     <rect>
-     <x>980</x>
-     <y>430</y>
-     <width>93</width>
-     <height>28</height>
+     <x>940</x>
+     <y>420</y>
+     <width>131</width>
+     <height>41</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+background-color: #DDD;
+border: none;
+color: #333;
+border-radius: 20%;
+}</string>
    </property>
    <property name="text">
     <string>Cancel</string>

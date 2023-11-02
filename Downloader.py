@@ -24,13 +24,12 @@ class MainWindow(QDialog):
         self.configFileName = "ConfigManga.txt"
         self.alternator = True
         self.pathText.setText(self.exportPath)
+        self.pageProgress.setValue(0)
 
         # Connections
         self.browseButton.clicked.connect(self.browseFiles)
         self.cancelButton.clicked.connect(self.exit)
         self.downloadButton.clicked.connect(self.downloadChapters)
-        self.startChapter.valueChanged.connect(self.startChanged)
-        self.endChapter.valueChanged.connect(self.endChanged)
 
         self.readConfig()
         self.writeConfig()
@@ -39,18 +38,6 @@ class MainWindow(QDialog):
         """Writes config values and exits the GUI"""
         self.writeConfig()
         sys.exit()
-
-
-    def startChanged(self):
-        """Edits end chapter if start > end"""
-        if self.startChapter.value() > self.endChapter.value():
-            self.endChapter.setValue(self.startChapter.value())
-
-
-    def endChanged(self):
-        """Edits start chapter if start > end"""
-        if self.startChapter.value() > self.endChapter.value():
-            self.startChapter.setValue(self.endChapter.value())
 
 
     # TODO: Make the source / keyword availa
@@ -103,16 +90,20 @@ class MainWindow(QDialog):
             if img.endswith(".jpg"):
                 os.remove(os.path.join(dir, img))
 
-    # TODO: Make .exe file
+
     # TODO: Type checking
     def downloadChapters(self):
         """Download a range of chapters and update progress bars"""
         s,e = self.startChapter.value(), self.endChapter.value()
-        self.chapterLabel.setText(f"Downloading Chapter 1 of {e - s + 1}")
+
+        if s > e:
+            e,s = s,e
+            
+        self.chapterLabel.setText(f"Starting download...")
 
         for i in range(self.startChapter.value(), self.endChapter.value() + 1):
+            self.chapterLabel.setText(f"Downloading Chapter #{i} ({i + 1 - s}/{e - s + 1})")
             self.download(i)
-            self.chapterLabel.setText(f"Downloading Chapter {i - s + 2} of {e - s + 1}")
             self.chapterProgress.setValue((i - s + 1) * 100 // (e - s + 1))
 
         self.chapterLabel.setText("ALL CHAPTERS DOWNLOADED")

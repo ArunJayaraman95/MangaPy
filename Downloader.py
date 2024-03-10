@@ -12,23 +12,19 @@ import logging
 
 # TODO: Chapter adjustments and arrows?
 # TODO: Better variable names
+# TODO: URL Class Atrribute
 # TODO: URL Select
 # TODO: Page offset
+# TODO: Type checking
 
-logger = logging.getLogger('MANGAPY')
+logger = logging.getLogger("MANGAPY")
 logger.setLevel(logging.DEBUG)
-
-# create console handler and set level to debug
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
 # create formatter
-formatter = logging.Formatter('%(name)s[%(levelname)s]: %(message)s')
-
-# add formatter to ch
+formatter = logging.Formatter("%(name)s[%(levelname)s]: %(message)s")
 ch.setFormatter(formatter)
-
-# add ch to logger
 logger.addHandler(ch)
 
 
@@ -50,7 +46,6 @@ class MainWindow(QDialog):
         self.pageProgress.setValue(0)
         self.srcTag = "src"
         self.tagKeyword = "blogspot"
-        self.configurations = ""
 
         # Connections
         self.browseButton.clicked.connect(self.browseFiles)
@@ -60,22 +55,28 @@ class MainWindow(QDialog):
         self.readConfig()
         self.writeConfig()
 
+
     def exit(self):
         """Writes config values and exits the GUI"""
+
         self.writeConfig()
         sys.exit()
+
 
     # TODO: Make the source / keyword availa
     def getMangaOnlyImages(self, imageList: list):
         """Return images maching certain attributes"""
+
         return [
             img
             for img in imageList
             if img.has_attr(self.srcTag) and self.tagKeyword in img[self.srcTag]
         ]
 
+
     def writeImages(self, chapter: int, imageList: list, nickName: str):
         """Write image contents into jpg files"""
+
         pageCount = len(imageList)
 
         for index, image in enumerate(imageList):
@@ -89,28 +90,28 @@ class MainWindow(QDialog):
             self.pageLabel.setText(f"Page {index + 1} / {pageCount}")
             self.pageProgress.setValue((index + 1) * 100 // pageCount)
 
+
     def browseFiles(self):
         """Allow user to open file explorer and select a directory"""
-        # fname=QFileDialog.getOpenFileName(self, 'Open file', 'C:\\', 'Images (*.png, *.xmp *.jpg)')
+
         fname = QFileDialog.getExistingDirectory(self, "Open File")
         logger.debug(f"{fname}")
         self.pathText.setText(fname)
         self.writeConfig()
 
-    def deleteTempImages(self, dir: str):
-        """Delete images in directory provided
 
-        Args:
-        dir -- Directory to delete imgs from
-        """
+    def deleteTempImages(self, dir: str):
+        """Delete images in directory provided"""
+
         x = os.listdir(dir)
         for img in x:
             if img.endswith(".jpg"):
                 os.remove(os.path.join(dir, img))
 
-    # TODO: Type checking
+
     def downloadChapters(self):
         """Download a range of chapters and update progress bars"""
+
         self.exportPath = self.pathText.text()
 
         s, e = self.startChapter.value(), self.endChapter.value()
@@ -131,11 +132,11 @@ class MainWindow(QDialog):
         self.cancelButton.setText("Finish")
         self.writeConfig()
 
+
     def writeConfig(self):
         """Write exportPath and next chapter to config file"""
-        # self.exportPath = self.pathText.text()
-        # # ? Manga Title, Export Path, Last Chapter, URL, SRC, KEY
 
+        # ? Manga Title, Export Path, Last Chapter, URL, SRC, KEY
         # # TODO: Add image src and keyword into dictionary
         dictionary = {
             "Manga": self.mangaTitle,
@@ -150,15 +151,14 @@ class MainWindow(QDialog):
 
     def readConfig(self):
         """Reads in configuration file and sets attributes in class"""
-        if not os.path.exists(self.configFileName):
-            return
+
         try:
             with open(self.configFileName, "r") as openfile:
                 json_object = json.load(openfile)
 
             logger.debug(json_object)
 
-            """Format: Manga, Path, LastChapterDownloaded, URL"""
+            # Format: Manga, Path, LastChapterDownloaded, URL
             self.mangaTitle = json_object["Manga"]
             self.exportPath = json_object["Export Path"]
             self.defaultChapter = json_object["Last Chapter"]
@@ -167,34 +167,37 @@ class MainWindow(QDialog):
             self.pathText.setText(self.exportPath)
             self.startChapter.setValue(int(self.defaultChapter))
             self.endChapter.setValue(int(self.defaultChapter))
-
         except:
             logger.error("Failed to read configuration file")
+            logger.error("Exiting Program...")
+            exit(0)
+
 
     def download(self, chapter: int):
         """Download a given chapter to export path with webscraping"""
+
         url = f"https://steel-ball-run.com/manga/jojos-bizarre-adventure-steel-ball-run-chapter-{chapter}/"
+
         try:
             r = requests.get(url)
             soup = bs(r.text, "html.parser")
-
             images = soup.find_all("img")  # Get all images
         except:
             logger.error("Error Accessing WebPage")
             exit(0)
+
         # Filter to only get imags in the manga itself
         images = self.getMangaOnlyImages(images)
-
         self.writeImages(chapter, images, self.mangaAbbrv)
 
         # List of Input file names
         inputFiles = [
             f"{self.mangaAbbrv}-{chapter}-{i}.jpg" for i in range(0, len(images))
         ]
+
         outputFile = open(f"{chapter}.pdf", "wb")
         outputFile.write(converter.convert(inputFiles))
         outputFile.close()
-
         logger.info("Completed Download!")
 
         self.deleteTempImages(self.tempFolder)
@@ -202,11 +205,13 @@ class MainWindow(QDialog):
 
         # Move pdf to exportPath
         self.exportPath = self.pathText.text()
+
         try:
             shutil.move(f"{chapter}.pdf", self.exportPath)
         except:
             os.remove(f"{chapter}.pdf")
             logger.warning("Chapter already exists")
+
         logger.info(f"Moved chapter {chapter}")
 
 

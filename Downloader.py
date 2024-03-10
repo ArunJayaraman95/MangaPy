@@ -8,12 +8,29 @@ import os
 import img2pdf as converter
 import shutil
 import json
+import logging
 
 # TODO: Chapter adjustments and arrows?
 # TODO: Better variable names
-# TODO: Logging instead of printing
 # TODO: URL Select
 # TODO: Page offset
+
+logger = logging.getLogger('MANGAPY')
+logger.setLevel(logging.DEBUG)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+# create formatter
+formatter = logging.Formatter('%(name)s[%(levelname)s]: %(message)s')
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+logger.addHandler(ch)
+
 
 class MainWindow(QDialog):
     def __init__(self):
@@ -65,7 +82,7 @@ class MainWindow(QDialog):
             name = f"{nickName}-{chapter}-{index}"
             source = image[self.srcTag]
 
-            print(f"...retrieving Pg #{index}...")
+            logger.info(f"...retrieving Pg #{index}...")
             with open(name.replace(" ", "-") + ".jpg", "wb") as f:
                 im = requests.get(source)
                 f.write(im.content)
@@ -76,7 +93,7 @@ class MainWindow(QDialog):
         """Allow user to open file explorer and select a directory"""
         # fname=QFileDialog.getOpenFileName(self, 'Open file', 'C:\\', 'Images (*.png, *.xmp *.jpg)')
         fname = QFileDialog.getExistingDirectory(self, "Open File")
-        print(fname)
+        logger.debug(f"{fname}")
         self.pathText.setText(fname)
         self.writeConfig()
 
@@ -130,7 +147,6 @@ class MainWindow(QDialog):
         with open(self.configFileName, "w") as outfile:
             json.dump(dictionary, outfile)
 
-        pass
 
     def readConfig(self):
         """Reads in configuration file and sets attributes in class"""
@@ -140,7 +156,7 @@ class MainWindow(QDialog):
             with open(self.configFileName, "r") as openfile:
                 json_object = json.load(openfile)
 
-            print(json_object)
+            logger.debug(json_object)
 
             """Format: Manga, Path, LastChapterDownloaded, URL"""
             self.mangaTitle = json_object["Manga"]
@@ -153,7 +169,7 @@ class MainWindow(QDialog):
             self.endChapter.setValue(int(self.defaultChapter))
 
         except:
-            print("Failed to read configuration file")
+            logger.error("Failed to read configuration file")
 
     def download(self, chapter: int):
         """Download a given chapter to export path with webscraping"""
@@ -164,7 +180,7 @@ class MainWindow(QDialog):
 
             images = soup.find_all("img")  # Get all images
         except:
-            print("Error Accessing WebPage")
+            logger.error("Error Accessing WebPage")
             exit(0)
         # Filter to only get imags in the manga itself
         images = self.getMangaOnlyImages(images)
@@ -179,10 +195,10 @@ class MainWindow(QDialog):
         outputFile.write(converter.convert(inputFiles))
         outputFile.close()
 
-        print("DONE Success")
+        logger.info("Completed Download!")
 
         self.deleteTempImages(self.tempFolder)
-        print("Deleted")
+        logger.info("Temp Files Deleted")
 
         # Move pdf to exportPath
         self.exportPath = self.pathText.text()
@@ -190,8 +206,8 @@ class MainWindow(QDialog):
             shutil.move(f"{chapter}.pdf", self.exportPath)
         except:
             os.remove(f"{chapter}.pdf")
-            print("Chapter already exists")
-        print(f"Moved chapter {chapter}")
+            logger.warning("Chapter already exists")
+        logger.info(f"Moved chapter {chapter}")
 
 
 app = QApplication(sys.argv)

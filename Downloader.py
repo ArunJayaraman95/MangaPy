@@ -9,6 +9,11 @@ import img2pdf as converter
 import shutil
 import json
 
+# TODO: Chapter adjustments and arrows?
+# TODO: Better variable names
+# TODO: Logging instead of printing
+# TODO: URL Select
+# TODO: Page offset
 
 class MainWindow(QDialog):
     def __init__(self):
@@ -18,15 +23,17 @@ class MainWindow(QDialog):
 
         # Variables
         self.tempFolder = os.getcwd()
+        self.mangaTitle = "SBR"
         self.exportPath = r"C:/Users/ripar/Documents/Books/Jojolion/"
         self.mangaAbbrv = "page"
         self.defaultChapter = 1
-        self.configFileName = "ConfigManga.json"
+        self.configFileName = "sample.json"
         self.alternator = True
         self.pathText.setText(self.exportPath)
         self.pageProgress.setValue(0)
         self.srcTag = "src"
         self.tagKeyword = "blogspot"
+        self.configurations = ""
 
         # Connections
         self.browseButton.clicked.connect(self.browseFiles)
@@ -44,13 +51,6 @@ class MainWindow(QDialog):
     # TODO: Make the source / keyword availa
     def getMangaOnlyImages(self, imageList: list):
         """Return images maching certain attributes"""
-        # ? Debugging the HTML
-        # for img in imageList:
-        #     print(img.has_attr('id'))
-        #     if img.has_attr('id'):
-        #         print(img['id'])
-        #         print("Src:", img['data-src'])
-        # return []
         return [
             img
             for img in imageList
@@ -94,6 +94,8 @@ class MainWindow(QDialog):
     # TODO: Type checking
     def downloadChapters(self):
         """Download a range of chapters and update progress bars"""
+        self.exportPath = self.pathText.text()
+
         s, e = self.startChapter.value(), self.endChapter.value()
 
         if s > e:
@@ -114,42 +116,44 @@ class MainWindow(QDialog):
 
     def writeConfig(self):
         """Write exportPath and next chapter to config file"""
-        f = open(self.configFileName, "w")
+        # self.exportPath = self.pathText.text()
+        # # ? Manga Title, Export Path, Last Chapter, URL, SRC, KEY
 
-        # TODO: Add image src and keyword into dictionary
+        # # TODO: Add image src and keyword into dictionary
         dictionary = {
-            "Manga": "Steel Ball Run",
+            "Manga": self.mangaTitle,
             "Export Path": self.exportPath,
             "Last Chapter": self.endChapter.value(),
         }
 
-        # Serializing json
-        json_object = json.dumps(dictionary, indent=4)
+        # # Writing to sample.json
+        with open(self.configFileName, "w") as outfile:
+            json.dump(dictionary, outfile)
 
-        # Writing to sample.json
-        with open("sample.json", "w") as outfile:
-            outfile.write(json_object)
-        self.exportPath = self.pathText.text()
-        f.write(f"{self.exportPath}$$${str(self.endChapter.value() + 1)}")
-
-        f.close()
+        pass
 
     def readConfig(self):
         """Reads in configuration file and sets attributes in class"""
         if not os.path.exists(self.configFileName):
             return
+        try:
+            with open(self.configFileName, "r") as openfile:
+                json_object = json.load(openfile)
 
-        f = open(self.configFileName, "r")
+            print(json_object)
 
-        temp = f.read().split("$$$")
-        self.exportPath = temp[0]
-        self.defaultChapter = temp[1]
+            """Format: Manga, Path, LastChapterDownloaded, URL"""
+            self.mangaTitle = json_object["Manga"]
+            self.exportPath = json_object["Export Path"]
+            self.defaultChapter = json_object["Last Chapter"]
 
-        self.pathText.setText(self.exportPath)
-        self.startChapter.setValue(int(self.defaultChapter))
-        self.endChapter.setValue(int(self.defaultChapter))
+            # Set newly read values on GUI
+            self.pathText.setText(self.exportPath)
+            self.startChapter.setValue(int(self.defaultChapter))
+            self.endChapter.setValue(int(self.defaultChapter))
 
-        f.close()
+        except:
+            print("Failed to read configuration file")
 
     def download(self, chapter: int):
         """Download a given chapter to export path with webscraping"""

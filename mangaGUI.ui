@@ -89,13 +89,13 @@ QProgressBar::chunk {
     <rect>
      <x>730</x>
      <y>240</y>
-     <width>251</width>
+     <width>261</width>
      <height>41</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>12</pointsize>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="styleSheet">
@@ -133,7 +133,7 @@ border-color: #F00;
     <rect>
      <x>260</x>
      <y>240</y>
-     <width>91</width>
+     <width>100</width>
      <height>51</height>
     </rect>
    </property>
@@ -150,8 +150,10 @@ border-color: #F00;
    </property>
    <property name="styleSheet">
     <string notr="true">QSpinBox {
-border: none;
-border-bottom: 2px solid black;
+  background-color: #77A;
+  border-radius: 10px; 
+  padding: 10px;
+  border: 1px solid black;
 }</string>
    </property>
    <property name="alignment">
@@ -194,7 +196,7 @@ border-bottom: 2px solid black;
     <rect>
      <x>450</x>
      <y>240</y>
-     <width>101</width>
+     <width>100</width>
      <height>51</height>
     </rect>
    </property>
@@ -205,8 +207,10 @@ border-bottom: 2px solid black;
    </property>
    <property name="styleSheet">
     <string notr="true">QSpinBox {
-border: none;
-border-bottom: 2px solid black;
+  background-color: #77A;
+  border-radius: 10px; 
+  padding: 10px;
+  border: 1px solid black;
 }</string>
    </property>
    <property name="alignment">
@@ -344,9 +348,9 @@ border-radius: 20%;
   <widget class="QPushButton" name="browseButton">
    <property name="geometry">
     <rect>
-     <x>990</x>
+     <x>1000</x>
      <y>240</y>
-     <width>121</width>
+     <width>111</width>
      <height>41</height>
     </rect>
    </property>

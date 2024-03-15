@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDialog, QApplication, QFileDialog
+from PyQt5.QtWidgets import QDialog, QApplication, QFileDialog, QMessageBox
 from PyQt5.uic import loadUi
 from bs4 import BeautifulSoup as bs
 import requests
@@ -10,11 +10,10 @@ import shutil
 import json
 import logging
 
-# TODO: Chapter adjustments and arrows?
+
 # TODO: Better variable names
 # TODO: URL Class Atrribute
 # TODO: URL Select
-# TODO: Page offset
 # TODO: Type checking
 
 logger = logging.getLogger("MANGAPY")
@@ -117,7 +116,14 @@ class MainWindow(QDialog):
         s, e = self.startChapter.value(), self.endChapter.value()
 
         if s > e:
-            e, s = s, e
+            msgBox = QMessageBox()
+
+            msgBox.setWindowTitle("Error Downloading")
+            msgBox.setText("Invalid range. Start chapter cannot be greater than end chapter. Try again.")
+            msgBox.setIcon(QMessageBox.Warning)
+
+            msgBox.exec()
+            return
 
         self.chapterLabel.setText(f"Starting download...")
 
@@ -141,7 +147,7 @@ class MainWindow(QDialog):
         dictionary = {
             "Manga": self.mangaTitle,
             "Export Path": self.exportPath,
-            "Last Chapter": self.endChapter.value(),
+            "Last Chapter": self.endChapter.value() + 1,
         }
 
         # # Writing to sample.json

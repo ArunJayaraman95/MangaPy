@@ -152,7 +152,7 @@ class MainWindow(QDialog):
 
         # # Writing to sample.json
         with open(self.configFileName, "w") as outfile:
-            json.dump(dictionary, outfile)
+            json.dump(dictionary, outfile, indent=4)
 
 
     def readConfig(self):

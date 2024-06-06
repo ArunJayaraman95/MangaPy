@@ -1,7 +1,12 @@
-# MangaPy (v1.0.0)
+# MangaPy (v1.1.0)
 Python GUI that enables users to download manga chapters locally to their PC.
 
+# Newest Features
+* Dictionary now read/writes multiple mangas to json
+
 ## Manga Titles Supported
+* Vagabond
+* Berserk
 * Steel Ball Run Colored (JJBA)
 
 ## Instructions
@@ -16,8 +21,6 @@ Python GUI that enables users to download manga chapters locally to their PC.
 5. Pick the chapter range to download and click "Download"
 6. Click "Finish" when done downloading chapters
 
-## New Features
-* Script generates a Config.txt file to save the user's past chapter range so they don't have to put in the start and the end every time
 
 ### Pyinstaller
 These are the steps to downloading pyinstaller for easier access to GUI

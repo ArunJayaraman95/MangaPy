@@ -31,26 +31,27 @@ class MainWindow(QDialog):
     def __init__(self):
         super(MainWindow, self).__init__()
         loadUi("MangaGUI.ui", self)
-        self.label.setText("Steel Ball Run Downloader")
+        self.label.setText("Vagabond Downloader")
 
         # Variables
         self.tempFolder = os.getcwd()
-        self.mangaTitle = "SBR"
+        self.mangaTitle = "Vagabond"
         self.exportPath = r"C:/Users/ripar/Documents/Books/Jojolion/"
         self.mangaAbbrv = "page"
         self.defaultChapter = 1
         self.configFileName = "sample.json"
-        self.alternator = True
-        self.pathText.setText(self.exportPath)
-        self.pageProgress.setValue(0)
+        self.alternator = True # TODO: Remove this
         self.srcTag = "src"
-        self.tagKeyword = "blogspot"
+        self.tagKeyword = "manga"
+        self.url = f"https://ww2.vagabond-manga.online/vagabondmanga/vagabond-chapter-%replace%/"
 
         # Connections
         self.browseButton.clicked.connect(self.browseFiles)
         self.cancelButton.clicked.connect(self.exit)
         self.downloadButton.clicked.connect(self.downloadChapters)
 
+        self.pathText.setText(self.exportPath)
+        self.pageProgress.setValue(0)
         self.readConfig()
         self.writeConfig()
 
@@ -58,6 +59,7 @@ class MainWindow(QDialog):
     def exit(self):
         """Writes config values and exits the GUI"""
 
+        logger.debug("Exiting")
         self.writeConfig()
         sys.exit()
 
@@ -76,6 +78,7 @@ class MainWindow(QDialog):
     def writeImages(self, chapter: int, imageList: list, nickName: str):
         """Write image contents into jpg files"""
 
+        logger.debug("Writing images to jpgs")
         pageCount = len(imageList)
 
         for index, image in enumerate(imageList):
@@ -93,15 +96,18 @@ class MainWindow(QDialog):
     def browseFiles(self):
         """Allow user to open file explorer and select a directory"""
 
+        logger.debug("Open folder browser")
         fname = QFileDialog.getExistingDirectory(self, "Open File")
         logger.debug(f"{fname}")
         self.pathText.setText(fname)
+        self.exportPath = self.pathText.text()
         self.writeConfig()
 
 
     def deleteTempImages(self, dir: str):
         """Delete images in directory provided"""
 
+        logger.debug("Deleting temporary images")
         x = os.listdir(dir)
         for img in x:
             if img.endswith(".jpg"):
@@ -111,11 +117,13 @@ class MainWindow(QDialog):
     def downloadChapters(self):
         """Download a range of chapters and update progress bars"""
 
-        self.exportPath = self.pathText.text()
+        logger.debug("Beginning chapter download")
+        startValue = self.startChapter.value()
+        endValue = self.endChapter.value()
+        chapterTotal = endValue - startValue + 1
+        isInvalidRange = startValue > endValue
 
-        s, e = self.startChapter.value(), self.endChapter.value()
-
-        if s > e:
+        if isInvalidRange:
             msgBox = QMessageBox()
 
             msgBox.setWindowTitle("Error Downloading")
@@ -127,12 +135,13 @@ class MainWindow(QDialog):
 
         self.chapterLabel.setText(f"Starting download...")
 
-        for i in range(self.startChapter.value(), self.endChapter.value() + 1):
+        for chapter in range(startValue, endValue + 1):
+            relativeChapter = chapter - startValue + 1
             self.chapterLabel.setText(
-                f"Downloading Chapter #{i} ({i + 1 - s}/{e - s + 1})"
+                f"Downloading Chapter #{chapter} ({relativeChapter}/{chapterTotal})"
             )
-            self.download(i)
-            self.chapterProgress.setValue((i - s + 1) * 100 // (e - s + 1))
+            self.download(chapter)
+            self.chapterProgress.setValue(relativeChapter * 100 // chapterTotal)
 
         self.chapterLabel.setText("ALL CHAPTERS DOWNLOADED")
         self.cancelButton.setText("Finish")
@@ -141,23 +150,30 @@ class MainWindow(QDialog):
 
     def writeConfig(self):
         """Write exportPath and next chapter to config file"""
-
+        logger.debug("Writing to Config File")
         # ? Manga Title, Export Path, Last Chapter, URL, SRC, KEY
         # # TODO: Add image src and keyword into dictionary
-        dictionary = {
-            "Manga": self.mangaTitle,
+
+        with open(self.configFileName, "r") as openfile:
+            mangas = json.load(openfile)
+
+        mangas[self.mangaTitle] = {
             "Export Path": self.exportPath,
-            "Last Chapter": self.endChapter.value() + 1,
+            "Last Chapter": self.endChapter.value(),
+            "URL": self.url,
+            "Src Tag": self.srcTag,
+            "Tag Keyword": self.tagKeyword
         }
 
         # # Writing to sample.json
         with open(self.configFileName, "w") as outfile:
-            json.dump(dictionary, outfile, indent=4)
+            json.dump(mangas, outfile, indent = 4)
 
 
     def readConfig(self):
         """Reads in configuration file and sets attributes in class"""
 
+        logger.debug("Reading Config File")
         try:
             with open(self.configFileName, "r") as openfile:
                 json_object = json.load(openfile)
@@ -165,10 +181,13 @@ class MainWindow(QDialog):
             logger.debug(json_object)
 
             # Format: Manga, Path, LastChapterDownloaded, URL
-            self.mangaTitle = json_object["Manga"]
-            self.exportPath = json_object["Export Path"]
-            self.defaultChapter = json_object["Last Chapter"]
-
+            manga = json_object[self.mangaTitle]
+            self.exportPath = manga["Export Path"]
+            self.defaultChapter = manga["Last Chapter"]
+            self.url = manga["URL"]
+            self.srcTag = manga["Src Tag"]
+            self.tagKeyword = manga["Tag Keyword"]
+            
             # Set newly read values on GUI
             self.pathText.setText(self.exportPath)
             self.startChapter.setValue(int(self.defaultChapter))
@@ -182,7 +201,8 @@ class MainWindow(QDialog):
     def download(self, chapter: int):
         """Download a given chapter to export path with webscraping"""
 
-        url = f"https://steel-ball-run.com/manga/jojos-bizarre-adventure-steel-ball-run-chapter-{chapter}/"
+        # Sub in chapter number into url
+        url = self.url.replace(f"%replace%", str(chapter))
 
         try:
             r = requests.get(url)

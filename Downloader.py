@@ -31,19 +31,19 @@ class MainWindow(QDialog):
     def __init__(self):
         super(MainWindow, self).__init__()
         loadUi("MangaGUI.ui", self)
-        self.label.setText("Steel Ball Run Downloader")
+        self.label.setText("Vagabond Downloader")
 
         # Variables
         self.tempFolder = os.getcwd()
-        self.mangaTitle = "SBR"
+        self.mangaTitle = "Vagabond"
         self.exportPath = r"C:/Users/ripar/Documents/Books/Jojolion/"
         self.mangaAbbrv = "page"
         self.defaultChapter = 1
         self.configFileName = "sample.json"
-        self.alternator = True
+        self.alternator = True # TODO: Remove this
         self.srcTag = "src"
-        self.tagKeyword = "blogspot"
-        self.url = f"https://steel-ball-run.com/manga/jojos-bizarre-adventure-steel-ball-run-chapter-%replace%/"
+        self.tagKeyword = "manga"
+        self.url = f"https://ww2.vagabond-manga.online/vagabondmanga/vagabond-chapter-%replace%/"
 
         # Connections
         self.browseButton.clicked.connect(self.browseFiles)
@@ -150,19 +150,24 @@ class MainWindow(QDialog):
 
     def writeConfig(self):
         """Write exportPath and next chapter to config file"""
-
         logger.debug("Writing to Config File")
         # ? Manga Title, Export Path, Last Chapter, URL, SRC, KEY
         # # TODO: Add image src and keyword into dictionary
-        dictionary = {
-            "Manga": self.mangaTitle,
+
+        with open(self.configFileName, "r") as openfile:
+            mangas = json.load(openfile)
+
+        mangas[self.mangaTitle] = {
             "Export Path": self.exportPath,
-            "Last Chapter": self.endChapter.value() + 1,
+            "Last Chapter": self.endChapter.value(),
+            "URL": self.url,
+            "Src Tag": self.srcTag,
+            "Tag Keyword": self.tagKeyword
         }
 
         # # Writing to sample.json
         with open(self.configFileName, "w") as outfile:
-            json.dump(dictionary, outfile, indent = 4)
+            json.dump(mangas, outfile, indent = 4)
 
 
     def readConfig(self):
@@ -176,9 +181,12 @@ class MainWindow(QDialog):
             logger.debug(json_object)
 
             # Format: Manga, Path, LastChapterDownloaded, URL
-            self.mangaTitle = json_object["Manga"]
-            self.exportPath = json_object["Export Path"]
-            self.defaultChapter = json_object["Last Chapter"]
+            manga = json_object[self.mangaTitle]
+            self.exportPath = manga["Export Path"]
+            self.defaultChapter = manga["Last Chapter"]
+            self.url = manga["URL"]
+            self.srcTag = manga["Src Tag"]
+            self.tagKeyword = manga["Tag Keyword"]
             
             # Set newly read values on GUI
             self.pathText.setText(self.exportPath)

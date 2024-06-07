@@ -31,7 +31,7 @@ class MainWindow(QDialog):
     def __init__(self):
         super(MainWindow, self).__init__()
         loadUi("MangaGUI.ui", self)
-        self.label.setText("Vagabond Downloader")
+        self.label.setText("Manga Downloader")
 
         # Variables
         self.tempFolder = os.getcwd()
@@ -52,9 +52,33 @@ class MainWindow(QDialog):
 
         self.pathText.setText(self.exportPath)
         self.pageProgress.setValue(0)
+        self.setup()
         self.readConfig()
         self.writeConfig()
 
+        self.titleDropdown.currentTextChanged.connect(self.updateManga)
+
+    def setup(self):
+
+        with open(self.configFileName, "r") as openfile:
+                json_object = json.load(openfile)
+
+        # TODO: Guard against no mangas in json
+        # Insert mangas into dropdown
+        self.titleDropdown.clear()
+        logger.info(f"Adding options for {list(json_object.keys())}")
+        self.titleDropdown.addItems(json_object.keys())
+        
+        self.mangaTitle = list(json_object.keys())[0]
+        self.label.setText(f"{self.mangaTitle} Downloader")
+
+
+    def updateManga(self):
+        logger.debug("Updating manga from dropdown change")
+        self.mangaTitle = self.titleDropdown.currentText()
+        self.label.setText(f"{self.mangaTitle} Downloader")
+
+        self.readConfig()
 
     def exit(self):
         """Writes config values and exits the GUI"""
@@ -178,7 +202,7 @@ class MainWindow(QDialog):
             with open(self.configFileName, "r") as openfile:
                 json_object = json.load(openfile)
 
-            logger.debug(json_object)
+            # logger.debug(json_object)
 
             # Format: Manga, Path, LastChapterDownloaded, URL
             manga = json_object[self.mangaTitle]

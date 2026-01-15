@@ -9,6 +9,24 @@ Python GUI that enables users to download manga chapters locally to their PC.
 * Berserk
 * Steel Ball Run Colored (JJBA)
 
+## Sample Json Setup
+{
+    "OnePunch": {
+        "Export Path": "C:/Users/ripar/OneDrive/Desktop/OnePunch",
+        "Last Chapter": 50,
+        "URL": "https://onepunchmanofficial.com/chapter/%replace%/",
+        "Src Tag": "src",
+        "Tag Keyword": "onepunch"
+    },
+        "OnePunch": {
+        "Export Path": "C:/Users/ripar/OneDrive/Desktop/OnePunch",
+        "Last Chapter": 50,
+        "URL": "https://onepunchmanofficial.com/chapter/%replace%/",
+        "Src Tag": "src",
+        "Tag Keyword": "onepunch"
+    }
+}
+
 ## Instructions
 1. Clone this repository
 2. pip install all unrecognized import libraries below in the `Downloader.py` file (you may have to do `pip install <library> --user`):
